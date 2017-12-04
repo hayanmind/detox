@@ -61,7 +61,7 @@ class AppleSimUtils {
       return false;
     }
     await this.waitForDeviceState(udid, 'Shutdown');
-    await this._bootDeviceByXcodeVersion(udid);
+    await this._bootDeviceMagically(udid);
     await this.waitForDeviceState(udid, 'Booted');
   }
 
@@ -190,16 +190,6 @@ class AppleSimUtils {
       'brew uninstall applesimutils && brew tap wix/brew && brew install --HEAD applesimutils'`);
     }
     return parsed;
-  }
-
-  async _bootDeviceByXcodeVersion(udid) {
-    const xcodeVersion = await this.getXcodeVersion();
-    if (xcodeVersion >= 9) {
-      const statusLogs = { trying: `Booting device ${udid}` };
-      await this._execSimctl({ cmd: `boot ${udid}`, statusLogs, retries: 10 });
-    } else {
-      await this._bootDeviceMagically(udid);
-    }
   }
 
   async _bootDeviceMagically(udid) {

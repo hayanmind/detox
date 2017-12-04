@@ -209,7 +209,6 @@ describe('AppleSimUtils', () => {
     it('waits for device by udid to be Shutdown, boots magically, then waits for state to be Booted', async () => {
       uut.findDeviceByUDID = jest.fn(() => Promise.resolve({ state: 'unknown' }));
       uut.waitForDeviceState = jest.fn(() => Promise.resolve(true));
-      uut.getXcodeVersion = jest.fn(() => Promise.resolve(1));
       expect(exec.execWithRetriesAndLogs).not.toHaveBeenCalled();
       await uut.boot('some udid');
       expect(exec.execWithRetriesAndLogs).toHaveBeenCalledWith(expect.stringMatching('xcode-select -p'), undefined, expect.anything(), 1);
@@ -220,7 +219,6 @@ describe('AppleSimUtils', () => {
 
     it('skips if device state was already Booted', async () => {
       uut.findDeviceByUDID = jest.fn(() => Promise.resolve({ state: 'Booted' }));
-      uut.getXcodeVersion = jest.fn(() => Promise.resolve(1));
       await uut.boot('udid');
       expect(uut.findDeviceByUDID).toHaveBeenCalledTimes(1);
       expect(exec.execWithRetriesAndLogs).not.toHaveBeenCalled();
@@ -228,20 +226,9 @@ describe('AppleSimUtils', () => {
 
     it('skips if device state was already Booting', async () => {
       uut.findDeviceByUDID = jest.fn(() => Promise.resolve({ state: 'Booting' }));
-      uut.getXcodeVersion = jest.fn(() => Promise.resolve(1));
       await uut.boot('udid');
       expect(uut.findDeviceByUDID).toHaveBeenCalledTimes(1);
       expect(exec.execWithRetriesAndLogs).not.toHaveBeenCalled();
-    });
-
-    it('boots with xcrun simctl boot when xcode version >= 9', async () => {
-      uut.findDeviceByUDID = jest.fn(() => Promise.resolve({ state: 'unknown' }));
-      uut.getXcodeVersion = jest.fn(() => Promise.resolve(9));
-      await uut.boot('udid');
-      expect(uut.getXcodeVersion).toHaveBeenCalledTimes(1);
-      expect(exec.execWithRetriesAndLogs).toHaveBeenCalledTimes(1);
-      expect(exec.execWithRetriesAndLogs).toHaveBeenCalledWith(expect.stringMatching('xcrun simctl boot udid'), undefined, expect.anything(), 10);
-
     });
   });
 
